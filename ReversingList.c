@@ -1,192 +1,134 @@
-//
-//  ReversingList.c
-//  MooKChen
-//
-//  Created by Xiao on 2021/3/27.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-typedef struct Node* NodePtrl;
-struct Node{
-    int flag;
-    char headstr[6];
-    int value;
-    char tailstr[6];
-    NodePtrl Next;
+#define MAX_SIZE 100001
+
+typedef struct node *data;
+struct node
+{
+    int head;
+    int num;
+    int tail;
 };
-typedef NodePtrl List;
 
-/*根据读入的结点数量建立一个带有头结点的单链表*/
-List CreatList(int N);
+void readData(data List[], int N);
+int sequenGroup(data List[], int N, int head);
+void reverseGroup(data List[], int N, int k);
+void printGroup(data List[], int N);
+void switchNode(data List[], int i, int j);
 
-/*将在堆上创建一个新的结点，插在指定结点的后面*/
-void attachNode(NodePtrl* rear);
-
-/*输入单链表*/
-void printList(List L);
-
-/*将各个结点通过首尾"address"按顺序连接起来*/
-void sortList(List h, char* hstr);
-
-/*交换两个结点的信息*/
-void switchNode(NodePtrl last, NodePtrl rear);
-
-/*对有序单链表进行最后的翻转排序*/
-void reversingList(List h, int N, int n);
-
-/*对翻转链表做前后字符串的修改工作，是前一结点的后字符串和后的前字符串一样*/
-void correctList(List h);
-
-int main() {
-    char headstr[6];
-    int N, n;
-    List head;
-    scanf("%s", headstr);
+int main()
+{
+    data List[MAX_SIZE];
+    int head = 0;
+    scanf("%d", &head);
+    int N = 0;
     scanf("%d", &N);
-    scanf("%d", &n);
-    
-    head = CreatList(N);
+    int k = 0;
+    scanf("%d", &k);
+    int newN = N;
 
-    sortList(head, headstr);
-    
-    reversingList(head, N, n);
-    correctList(head);
-    printList(head);
-    
+    //read the data
+   if (N)
+    {
+        /* when N >0 read the data */
+        readData(List, N);
+
+        /* make the node in the group sequential */
+        newN = sequenGroup(List, N, head);
+
+        /* reverse the group */
+        reverseGroup(List, newN, k);
+
+    }
+    printGroup(List, newN);
+
     return 0;
 }
 
-List CreatList(int N){
-    //定义头结点
-    NodePtrl head = (NodePtrl)malloc(sizeof(struct Node));
-    head->Next = NULL;
-    head->flag = 0;
-    
-    NodePtrl rear = head;
-    
-    while(N--){
-        attachNode(&rear);
-    }
-    return head;
-}
-void attachNode(NodePtrl* rear){
-    //初始化新定义的结点，读入输入的信息结点
-    NodePtrl t = (NodePtrl)malloc(sizeof(struct Node));
-    t->flag = (*rear)->flag + 1;
-    scanf("%s", t->headstr);
-    scanf("%d", &t->value);
-    scanf("%s", t->tailstr);
-    t->Next = NULL;
-    
-    //连接
-    (*rear)->Next = t;
-    (*rear) = (*rear)->Next;
-}
+void readData(data List[], int N){
 
-void printList(List L){
-    NodePtrl l = L->Next;
-    while(l){
-        if(l->flag > 1)
-            printf("\n");
-        
-        printf("%s %d %s", l->headstr, l->value, l->tailstr);
-        l = l->Next;
+    //make N nodes
+    for(int i = 1; i <= N; i++){
+        data node_ = (data)malloc(sizeof(struct node));
+        scanf("%d", &node_->head);
+        scanf("%d", &node_->num);
+        scanf("%d", &node_->tail);
+        List[i] = node_;
     }
 }
 
-void sortList(List h, char* hstr){
-    NodePtrl lastone = h->Next, rear = h->Next;
-    
-    //先找到首结点的位置,然后交换，是首结点就位
-    while(1){
-        if(strcmp(rear->headstr, hstr) == 0)
-            break;
-        rear = rear->Next;
+void printGroup(data List[], int N){
+    for(int i = 1; i <= N; i++){
+        if(List[i]->tail == -1)
+            printf("%05d %d -1\n", List[i]->head, List[i]->num);
+        else
+            printf("%05d %d %05d\n", List[i]->head, List[i]->num, List[i]->tail);
     }
-    switchNode(lastone, rear);
-    
-    //排序之后的结点
-    rear = lastone->Next;
-    while(rear != NULL){
-        while(1){
-            if(strcmp(rear->headstr, lastone->tailstr) == 0)
+}
+
+void switchNode(data List[], int i, int j){
+    data a = List[i];
+    List[i] = List[j];
+    List[j] = a;
+}
+
+int sequenGroup(data List[], int N, int head){
+
+    int flag = 1;
+    int i = 1;
+    while (flag)
+    {
+        /* find the head node */
+        if(List[i]->head == head){
+            switchNode(List, i, 1);
+            flag = 0;
+        }
+        i++;
+    }
+
+    i = 2;
+    while(i < N){
+        //找到应该在第 i 个位置上的结点，并交换位置
+        for(int j = i; j<=N; j++){
+            if(List[i-1]->tail == List[j]->head){
+                switchNode(List, i, j);
                 break;
-            rear = rear->Next;
-        }
-        if(lastone->flag + 1 != rear->flag){
-            switchNode(lastone->Next, rear);
-        }
-        lastone = lastone->Next;
-        rear = lastone->Next;
-    }
-}
-
-void switchNode(NodePtrl last, NodePtrl rear){
-//    struct Node{
-//        int flag;  flag不需要改变
-//        char headstr[6];   改变
-//        int value;     改变
-//        char tailstr[6];   改变
-//        NodePtrl Next;   不需要改变
-//    };
-    
-    char h[6], t[6];
-    int v;
-    
-    v = last->value;
-    last->value = rear->value;
-    rear->value = v;
-    
-    strcpy(h, last->headstr);
-    strcpy(last->headstr, rear->headstr);
-    strcpy(rear->headstr, h);
-    
-    strcpy(t, last->tailstr);
-    strcpy(last->tailstr, rear->tailstr);
-    strcpy(rear->tailstr, t);
-}
-
-void reversingList(List h, int N, int n){
-    int time = N / n;
-    int begin = 1; int end = n;
-    NodePtrl b; //begin
-    NodePtrl e; //end
-    
-    while(time--){
-        
-        while(begin < end){
-            b = h;
-            e = h;
-            
-            while(1){//find the begin
-                if(b->flag == begin)     break;
-                b = b->Next;
             }
-            while(1){//find the end
-                if(e->flag == end)     break;
-                e = e->Next;
-            }
-            
-            switchNode(b, e);
-            
-            begin++;
-            end--;
         }
-        
-        begin += n;
-        end += n;
+        i++;
     }
+
+    //遍历整个数组，看看有没有多余的结点
+    for(int i = 1; i <= N; i++){
+        if(i == N)  return N;
+        if(List[i]->tail == List[i+1]->head){
+            continue;
+        }else{
+            return (i);
+        }
+    }
+    
 }
 
-void correctList(List h){
-    NodePtrl m = h->Next;
-    
-    while(m->Next){
-        strcpy(m->tailstr, m->Next->headstr);
-        m = m->Next;
+void reverseGroup(data List[], int N, int k){
+    //定义有多少组结点需要做处理，k个为一组
+    int num = N/k;
+
+    for(int i = 1; i <= num; i++){//i是组号
+        //一组一组翻转
+        //每组需要交换几对数据
+        for(int j = 1; j < (k / 2) + 1; j++){//j是组中的顺序位
+            int lastOne = (i - 1) * k + j;
+            int nextOne = (i - 1) * k + k + 1 - j;
+            switchNode(List, lastOne, nextOne);
+
+        }
     }
-    strcpy(m->tailstr, "-1");
+
+    //到这里就已经翻转好了，但只是中间的数据处理好了，还要将头和尾处理好
+    for(int i = 1; i < N; i++){
+        List[i]->tail = List[i+1]->head;
+    }
+    List[N]->tail = -1;
 }
