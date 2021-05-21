@@ -3,3 +3,4 @@
 ## 第二课
 * [一元多项式的乘法和加法运算](AddplusMult.c)
 * [Reversing Linked List](ReversingList.c)    
+* [PoP Sequence](PopSequence.c)
