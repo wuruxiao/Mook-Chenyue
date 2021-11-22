@@ -5,6 +5,7 @@
   * [C语言版](MaximumSonSum.c)
 * 复杂度2 Maximum Subsequence Sum
   * [C语言版](MaxSS2.c)
+* [复杂度3 二分查找](BinarySearch.c)
 ## 第二课
 * [一元多项式的乘法和加法运算](AddplusMult.c)
 * [Reversing Linked List](ReversingList.c)    
